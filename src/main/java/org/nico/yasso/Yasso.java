@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.nico.yasso.consts.OSType;
+import org.nico.yasso.observer.SimpleJobsObserver;
 import org.nico.yasso.pipeline.jobs.YassoJob;
-import org.nico.yasso.watch.SimpleJobsObserver;
+import org.nico.yasso.utils.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 
 public class Yasso {
@@ -19,34 +22,60 @@ public class Yasso {
     
     private OSType osType; 
     
-    private List<YassoJob> jobs; 
+    private Set<YassoJob> jobs; 
     
-    private volatile static Yasso configuration;
+    private volatile static Yasso yasso;
+    
+    private static Yaml yaml = new Yaml();
     
     private Yasso() { }
     
     public static Yasso getInstance(String conf) throws IOException {
-        if(configuration == null) {
+        if(yasso == null) {
             synchronized (Yasso.class) {
-                if(configuration == null) {
+                if(yasso == null) {
                     initialize(conf);
                 }
             }
         }
-        return configuration;
+        return yasso;
     }
     
     private static void initialize(String conf) throws IOException {
         String yassoHome = System.getProperty("user.dir");
         String osName = System.getProperty("os.name");  
         
-        Yaml yaml = new Yaml();
-        File yassoConf = new File(yassoHome + "\\" + conf);
-        configuration = yaml.loadAs(new FileInputStream(yassoConf), Yasso.class);
-        configuration.setYassoHome(yassoHome);
-        configuration.setOsType(osName.startsWith("Windows") ? OSType.WINDOWS : OSType.LINUX);
         
-        new SimpleJobsObserver().observe(configuration.getJobsHome());
+        File yassoConf = new File(yassoHome + "\\" + conf);
+        yasso = yaml.loadAs(new FileInputStream(yassoConf), Yasso.class);
+        yasso.setYassoHome(yassoHome);
+        yasso.setOsType(osName.startsWith("Windows") ? OSType.WINDOWS : OSType.LINUX);
+        yasso.setJobs(new LinkedHashSet<YassoJob>());
+        
+        new SimpleJobsObserver().observe(yasso.getJobsHome());
+    }
+    
+    public static void loadJob(String jobConfName) throws FileNotFoundException {
+        if(yasso == null) {
+            throw new NullPointerException("Yasso need initialize !");
+        }
+        String name = FileUtils.parseName(jobConfName);
+        
+        File jobConf = new File(yasso.getJobsHome() + "\\" + jobConfName);
+        YassoJob job = yaml.loadAs(new FileInputStream(jobConf), YassoJob.class);
+        job.setName(name);
+        
+        yasso.getJobs().add(job);
+    }
+    
+    public static void removeJob(String jobConfName) {
+        if(yasso == null) {
+            throw new NullPointerException("Yasso need initialize !");
+        }
+        String name = FileUtils.parseName(jobConfName);
+        YassoJob tempJob = new YassoJob();
+        tempJob.setName(name);
+        yasso.getJobs().remove(tempJob);
     }
     
     public String getYassoHome() {
@@ -65,20 +94,20 @@ public class Yasso {
         this.jobsHome = jobsHome;
     }
 
-    public List<YassoJob> getJobs() {
-        return jobs;
-    }
-
-    public void setJobs(List<YassoJob> jobs) {
-        this.jobs = jobs;
-    }
-
     public OSType getOsType() {
         return osType;
     }
 
     public void setOsType(OSType osType) {
         this.osType = osType;
+    }
+
+    public Set<YassoJob> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(Set<YassoJob> jobs) {
+        this.jobs = jobs;
     }
     
 }

@@ -2,33 +2,70 @@ package org.nico.yasso.task;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskManager {
 
-    protected final static ThreadPoolExecutor TASK_SERVICE = new ThreadPoolExecutor(10, 50, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-
-    private Map<String, JobTask> taskMap;
+    private Scheduler scheduler;
+    
+    private Map<String, JobDetail> taskMap;
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(TaskManager.class);
 
     public TaskManager() {
-        taskMap = new ConcurrentHashMap<String, JobTask>();
+        taskMap = new ConcurrentHashMap<String, JobDetail>();
+        try {
+            scheduler = new StdSchedulerFactory().getScheduler();
+            scheduler.start();
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
     }
-    
+
     public void create(YassoJob job) {
-        JobTask task = new JobTask(job);
-        taskMap.put(job.getName(), task);
+        JobDataMap jobData = new JobDataMap();
+        jobData.put("job", job);
+        JobDetail jobDetail = JobBuilder.newJob(JobTask.class)
+                            .withIdentity("JobDetail-" + job.getName())
+                            .setJobData(jobData)
+                            .build();
+
+        CronTrigger cronTrigger = TriggerBuilder.newTrigger()
+                            .withIdentity("cronTrigger-" + job.getName())
+                            .withSchedule(CronScheduleBuilder.cronSchedule(job.getCron()))
+                            .build();
         
-        TASK_SERVICE.execute(task);
+        try {
+            scheduler.scheduleJob(jobDetail, cronTrigger);
+            LOGGER.info("Task schedule job [{}] with cron {}", job.getName(), job.getCron());
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        taskMap.put(job.getName(), jobDetail);
+
     }
-    
+
     public void remove(YassoJob job) {
-        JobTask task = taskMap.remove(job.getName());
-        if(task != null) {
-            task.close();
+        JobDetail jobDetail = taskMap.remove(job.getName());
+        if(jobDetail != null) {
+            try {
+                scheduler.deleteJob(jobDetail.getKey());
+                LOGGER.info("Task remove job [{}]", job.getName());
+            } catch (SchedulerException e) {
+                e.printStackTrace();
+            }
         }
     }
 

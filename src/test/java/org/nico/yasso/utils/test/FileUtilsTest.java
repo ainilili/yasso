@@ -12,4 +12,10 @@ public class FileUtilsTest {
         System.out.println(name);
         Assert.assertEquals(name, "test");
     }
+    
+    @Test
+    public void containsFileTest() {
+        System.out.println(FileUtils.containsFile("D:\\yasso", "snails.yml"));
+        System.out.println(FileUtils.containsFile("D:\\yasso", "test"));
+    }
 }

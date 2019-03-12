@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.nico.yasso.utils.StringUtils;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
@@ -41,20 +42,20 @@ public class SimpleTest {
     public void testQuartz() throws InterruptedException {
         try {
             JobDetail jobDetail = JobBuilder.newJob(HelloJob.class).withIdentity("myJob").build();
-           
+
             CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity("cronTrigger").withSchedule(CronScheduleBuilder.cronSchedule("* * * * * ?")).build();
-            
+
             //创建schedule实例
             StdSchedulerFactory factory = new StdSchedulerFactory();
             Scheduler scheduler = factory.getScheduler();
             scheduler.start();
             scheduler.scheduleJob(jobDetail,cronTrigger);
-            
-            
+
+
             new Thread() {
                 @Override
                 public void run() {
-                    
+
                     try {
                         Thread.sleep(1000 * 5);
                         scheduler.deleteJob(jobDetail.getKey());
@@ -67,17 +68,30 @@ public class SimpleTest {
         } catch (SchedulerException se) {
             se.printStackTrace();
         }
-        
+
         Thread.sleep(10000000);
-        
+
     }
-    
+
     public static class HelloJob implements Job{
 
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println(System.currentTimeMillis());
         }
+
+    }
+
+    @Test
+    public void testUrl() {
+        String gitUrl = "https://github.com/ainilili/xxx.git";
+        String sign = "abc:efg@";
+
+        int httpFlag = gitUrl.indexOf("://");
+        httpFlag += 3;
+        gitUrl = gitUrl.substring(0, httpFlag) + sign + gitUrl.substring(httpFlag);
+        System.out.println(gitUrl);
         
+        System.out.println(gitUrl.substring(gitUrl.lastIndexOf("/") + 1, gitUrl.lastIndexOf(".")));
     }
 }

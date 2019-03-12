@@ -5,13 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.nico.yasso.consts.OSType;
 import org.nico.yasso.observer.SimpleJobsObserver;
 import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.nico.yasso.task.TaskManager;
 import org.nico.yasso.utils.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 public class Yasso {
@@ -20,13 +22,19 @@ public class Yasso {
     
     private String jobsHome;
     
+    private String workspace;
+    
     private OSType osType; 
     
     private Set<YassoJob> jobs; 
     
+    private TaskManager taskManager;
+    
     private volatile static Yasso yasso;
     
     private static Yaml yaml = new Yaml();
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(Yasso.class);
     
     private Yasso() { }
     
@@ -41,6 +49,10 @@ public class Yasso {
         return yasso;
     }
     
+    public static Yasso getYasso(){
+        return yasso;
+    }
+    
     private static void initialize(String conf) throws IOException {
         String yassoHome = System.getProperty("user.dir");
         String osName = System.getProperty("os.name");  
@@ -51,6 +63,7 @@ public class Yasso {
         yasso.setYassoHome(yassoHome);
         yasso.setOsType(osName.startsWith("Windows") ? OSType.WINDOWS : OSType.LINUX);
         yasso.setJobs(new LinkedHashSet<YassoJob>());
+        yasso.setTaskManager(new TaskManager());
         
         new SimpleJobsObserver().observe(yasso.getJobsHome());
     }
@@ -66,6 +79,10 @@ public class Yasso {
         job.setName(name);
         
         yasso.getJobs().add(job);
+        yasso.getTaskManager().remove(job);
+        yasso.getTaskManager().create(job);
+        
+        LOGGER.info("Create job：" + job);
     }
     
     public static void removeJob(String jobConfName) {
@@ -76,6 +93,9 @@ public class Yasso {
         YassoJob tempJob = new YassoJob();
         tempJob.setName(name);
         yasso.getJobs().remove(tempJob);
+        yasso.getTaskManager().remove(tempJob);
+        
+        LOGGER.info("Remove job：" + tempJob);
     }
     
     public String getYassoHome() {
@@ -108,6 +128,22 @@ public class Yasso {
 
     public void setJobs(Set<YassoJob> jobs) {
         this.jobs = jobs;
+    }
+
+    public String getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
+
+    public void setTaskManager(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
     
 }

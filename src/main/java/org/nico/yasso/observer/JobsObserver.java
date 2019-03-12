@@ -1,5 +1,7 @@
 package org.nico.yasso.observer;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import org.nico.yasso.Yasso;
 
 import com.sun.nio.file.SensitivityWatchEventModifier;
 
@@ -26,6 +30,19 @@ public abstract class JobsObserver {
                 {StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE,
                         StandardWatchEventKinds.ENTRY_DELETE}, SensitivityWatchEventModifier.HIGH);
 
+        File targetDir = new File(dir);
+        if(targetDir.exists() && targetDir.isDirectory()) {
+            String[] fileNames = targetDir.list((dirPath, name) -> name.endsWith(".yml"));
+            if(fileNames != null) {
+                for(String fileName: fileNames) {
+                    Yasso.loadJob(fileName);
+                }
+            }
+        }else {
+            throw new IOException(dir + " is not a directory !");
+        }
+        
+        
         OBSERVER_SERVICE.execute(() -> {
             while(true){  
                 WatchKey watchKey = null;

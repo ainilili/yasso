@@ -96,5 +96,10 @@ public class YassoJob {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "YassoJob [name=" + name + ", gitUrl=" + gitUrl + "]";
+    }
     
 }

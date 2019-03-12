@@ -2,22 +2,15 @@ package org.nico.yasso.task;
 
 import org.nico.yasso.pipeline.AbstractPipeline;
 import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
-public class JobTask implements Runnable{
-
-    private YassoJob job;
-    
-    public JobTask(YassoJob job) {
-        this.job = job;
-    }
+public class JobTask implements Job{
 
     @Override
-    public void run() {
-        AbstractPipeline.handle(job);
-    }
-    
-    public void close() {
-        
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        AbstractPipeline.handle(((YassoJob) context.getJobDetail().getJobDataMap().get("job")));
     }
 
 }

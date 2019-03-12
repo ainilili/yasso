@@ -19,7 +19,7 @@ public class CommandUtils {
         try {
             LOGGER.info("+ " + script);
             Process process = Runtime.getRuntime().exec(script, null, new File(dir));
-            return getResult(process);
+            return doWaitFor(process);
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -50,8 +50,69 @@ public class CommandUtils {
         String line = null; 
         while ((line = br.readLine()) != null) { 
             sb.append(line).append("\n"); 
+            LOGGER.info(line);
         }
         return sb.toString();
+    }
+    
+    @SuppressWarnings("static-access")
+    public static Result doWaitFor(Process process) {
+      InputStream in = null;
+      InputStream err = null;
+      
+      StringBuilder inMsg = new StringBuilder();
+      StringBuilder errMsg = new StringBuilder();
+      
+      try {
+        in = process.getInputStream();
+        err = process.getErrorStream();
+        
+        boolean finished = false; // Set to true when p is finished
+        while (!finished) {
+          try {
+            while (in.available() > 0) {
+              // Print the output of our system call
+              Character c = new Character((char) in.read());
+              inMsg.append(c);
+              System.out.print(c);
+            }
+            while (err.available() > 0) {
+              // Print the output of our system call
+              Character c = new Character((char) err.read());
+              errMsg.append(c);
+              System.out.print(c);
+            }
+            // Ask the process for its exitValue. If the process
+            // is not finished, an IllegalThreadStateException
+            // is thrown. If it is finished, we fall through and
+            // the variable finished is set to true.
+            process.exitValue();
+            finished = true;
+          } catch (IllegalThreadStateException e) {
+            // Process is not finished yet;
+            // Sleep a little to save on CPU cycles
+            Thread.currentThread().sleep(500);
+          }
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        try {
+          if (in != null) {
+            in.close();
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        if (err != null) {
+          try {
+            err.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+      return new Result(errMsg.toString(), inMsg.toString());
     }
 
     public static class Result{

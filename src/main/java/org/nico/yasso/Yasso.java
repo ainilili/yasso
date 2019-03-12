@@ -77,6 +77,7 @@ public class Yasso {
         File jobConf = new File(yasso.getJobsHome() + "\\" + jobConfName);
         YassoJob job = yaml.loadAs(new FileInputStream(jobConf), YassoJob.class);
         job.setName(name);
+        job.init();
         
         yasso.getJobs().add(job);
         yasso.getTaskManager().remove(job);

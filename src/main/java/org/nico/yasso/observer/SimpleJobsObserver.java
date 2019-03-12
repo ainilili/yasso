@@ -19,16 +19,16 @@ public class SimpleJobsObserver extends JobsObserver{
         String jobConfName = event.context().toString();
         
         if(event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-            LOGGER.info("create：{}", jobConfName);
+            LOGGER.info("Create：{}", jobConfName);
             Yasso.loadJob(jobConfName);
         }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
             modifyCount += event.count();
             if(modifyCount % 2 == 0) {
-                LOGGER.info("modify：{}", jobConfName);
+                LOGGER.info("Modify：{}", jobConfName);
                 Yasso.loadJob(jobConfName);
             }
         }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-            LOGGER.info("remove：{}", jobConfName);
+            LOGGER.info("Remove：{}", jobConfName);
             Yasso.removeJob(jobConfName);
         }
     }

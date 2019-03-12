@@ -3,22 +3,35 @@ package org.nico.yasso.pipeline;
 import java.util.LinkedList;
 
 import org.nico.yasso.pipeline.impl.GitPipeline;
+import org.nico.yasso.pipeline.impl.PostShellPipeline;
 import org.nico.yasso.pipeline.jobs.YassoJob;
 
 public abstract class AbstractPipeline {
 
     public static LinkedList<AbstractPipeline> pipelines = new LinkedList<AbstractPipeline>();
     
+    protected AbstractPipeline next;
+    
     static {
-        pipelines.addLast(new GitPipeline());
+        add(new GitPipeline());
+        add(new PostShellPipeline());
+    }
+    
+    public static void add(AbstractPipeline pipeline) {
+        if(! pipelines.isEmpty()) {
+            pipelines.getLast().next = pipeline;
+        }
+        pipelines.addLast(pipeline);
     }
     
     public static void handle(YassoJob job) {
         if(! pipelines.isEmpty()) {
-            pipelines.stream().forEach(pipeline -> {
-                pipeline.pipeline(job);
-            });
+            pipelines.getFirst().pipeline(job);
         }
+    }
+    
+    protected void then(YassoJob job) {
+        if(next != null) next.pipeline(job);
     }
     
     public abstract void pipeline(YassoJob job);

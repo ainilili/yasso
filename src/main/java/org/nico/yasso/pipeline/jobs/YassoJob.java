@@ -1,21 +1,37 @@
 package org.nico.yasso.pipeline.jobs;
 
+import org.nico.yasso.utils.StringUtils;
+
 public class YassoJob {
 
     private String name;
-    
+
     private String gitUrl;
-    
+
+    private String projectName;
+
     private String gitUser;
-    
+
     private String gitPwd;
-    
+
     private String preShell;
-    
+
     private String postShell;
-    
+
     private String cron;
-    
+
+    public void init() {
+        if(StringUtils.isNotBlank(gitUser)
+                && StringUtils.isNotBlank(gitPwd)) {
+            String sign = gitUser + ":" + gitPwd + "@";
+            int httpFlag = gitUrl.indexOf("://");
+            httpFlag += 3;
+            gitUrl = gitUrl.substring(0, httpFlag) + sign + gitUrl.substring(httpFlag);
+        }
+
+        projectName = gitUrl.substring(gitUrl.lastIndexOf("/") + 1, gitUrl.lastIndexOf("."));
+    }
+
     public String getName() {
         return name;
     }
@@ -72,6 +88,14 @@ public class YassoJob {
         this.cron = cron;
     }
 
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -99,7 +123,6 @@ public class YassoJob {
 
     @Override
     public String toString() {
-        return "YassoJob [name=" + name + ", gitUrl=" + gitUrl + "]";
+        return name;
     }
-    
 }

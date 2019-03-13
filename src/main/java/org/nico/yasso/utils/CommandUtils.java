@@ -5,21 +5,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 
-import org.nico.yasso.pipeline.impl.GitPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CommandUtils {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GitPipeline.class);
-    
+    private final static Logger LOGGER = LoggerFactory.getLogger(CommandUtils.class);
+
     public static Result execute(String script, String dir) {
         try {
             LOGGER.info("+ " + script);
             Process process = Runtime.getRuntime().exec(script, null, new File(dir));
-            return doWaitFor(process);
+            return getResult(process);
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -54,65 +52,55 @@ public class CommandUtils {
         }
         return sb.toString();
     }
-    
+
     @SuppressWarnings("static-access")
     public static Result doWaitFor(Process process) {
-      InputStream in = null;
-      InputStream err = null;
-      
-      StringBuilder inMsg = new StringBuilder();
-      StringBuilder errMsg = new StringBuilder();
-      
-      try {
-        in = process.getInputStream();
-        err = process.getErrorStream();
-        
-        boolean finished = false; // Set to true when p is finished
-        while (!finished) {
-          try {
-            while (in.available() > 0) {
-              // Print the output of our system call
-              Character c = new Character((char) in.read());
-              inMsg.append(c);
-              System.out.print(c);
-            }
-            while (err.available() > 0) {
-              // Print the output of our system call
-              Character c = new Character((char) err.read());
-              errMsg.append(c);
-              System.out.print(c);
-            }
-            // Ask the process for its exitValue. If the process
-            // is not finished, an IllegalThreadStateException
-            // is thrown. If it is finished, we fall through and
-            // the variable finished is set to true.
-            process.exitValue();
-            finished = true;
-          } catch (IllegalThreadStateException e) {
-            // Process is not finished yet;
-            // Sleep a little to save on CPU cycles
-            Thread.currentThread().sleep(500);
-          }
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      } finally {
+        InputStream in = null;
+        InputStream err = null;
+
+        String inMsg = null;
+        String errMsg = null;
+
         try {
-          if (in != null) {
-            in.close();
-          }
-        } catch (IOException e) {
-          e.printStackTrace();
+
+            in = process.getInputStream();
+            err = process.getErrorStream();
+
+            boolean finished = false; // Set to true when p is finished
+            while (!finished) {
+                try {
+                    inMsg = readStream(in);
+                    errMsg = readStream(err);
+                    // Ask the process for its exitValue. If the process
+                    // is not finished, an IllegalThreadStateException
+                    // is thrown. If it is finished, we fall through and
+                    // the variable finished is set to true.
+                    process.exitValue();
+                    finished = true;
+                } catch (IllegalThreadStateException e) {
+                    // Process is not finished yet;
+                    // Sleep a little to save on CPU cycles
+                    Thread.currentThread().sleep(500);
+                }
+            }
+        } catch (Exception e) {
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (err != null) {
+                try {
+                    err.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        if (err != null) {
-          try {
-            err.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-      return new Result(errMsg.toString(), inMsg.toString());
+        return new Result(errMsg, inMsg);
     }
 
     public static class Result{

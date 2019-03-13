@@ -30,6 +30,9 @@ public class FileUtils {
         if(! file.exists()) {
             try {
                 file.createNewFile();
+                file.setReadable(true, false);
+                file.setExecutable(true, false);
+                file.setWritable(true, false);
             } catch (IOException e) {
                 e.printStackTrace();
             }

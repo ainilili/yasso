@@ -4,7 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Test;
-import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.utils.StringUtils;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;

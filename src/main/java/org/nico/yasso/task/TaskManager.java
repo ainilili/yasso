@@ -3,7 +3,7 @@ package org.nico.yasso.task;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.nico.yasso.pipeline.jobs.YassoJob;
+import org.nico.yasso.entity.YassoJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -44,12 +44,12 @@ public class TaskManager {
 
         CronTrigger cronTrigger = TriggerBuilder.newTrigger()
                             .withIdentity("cronTrigger-" + job.getName())
-                            .withSchedule(CronScheduleBuilder.cronSchedule(job.getCron()))
+                            .withSchedule(CronScheduleBuilder.cronSchedule(job.getBuild().getCron()))
                             .build();
         
         try {
             scheduler.scheduleJob(jobDetail, cronTrigger);
-            LOGGER.info("Task schedule job [{}] with cron {}", job.getName(), job.getCron());
+            LOGGER.info("Task schedule job [{}] with cron {}", job.getName(), job.getBuild().getCron());
         } catch (SchedulerException e) {
             e.printStackTrace();
         }

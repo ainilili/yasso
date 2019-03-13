@@ -2,9 +2,9 @@ package org.nico.yasso.pipeline;
 
 import java.util.LinkedList;
 
+import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.pipeline.impl.GitPipeline;
 import org.nico.yasso.pipeline.impl.PostShellPipeline;
-import org.nico.yasso.pipeline.jobs.YassoJob;
 
 public abstract class AbstractPipeline {
 

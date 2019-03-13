@@ -7,9 +7,8 @@ import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.nico.yasso.consts.OSType;
+import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.observer.SimpleJobsObserver;
-import org.nico.yasso.pipeline.jobs.YassoJob;
 import org.nico.yasso.task.TaskManager;
 import org.nico.yasso.utils.FileUtils;
 import org.slf4j.Logger;
@@ -23,8 +22,6 @@ public class Yasso {
     private String jobsHome;
     
     private String workspace;
-    
-    private OSType osType; 
     
     private Set<YassoJob> jobs; 
     
@@ -55,13 +52,10 @@ public class Yasso {
     
     private static void initialize(String conf) throws IOException {
         String yassoHome = System.getProperty("user.dir");
-        String osName = System.getProperty("os.name");  
-        
         
         File yassoConf = new File(yassoHome + "\\" + conf);
         yasso = yaml.loadAs(new FileInputStream(yassoConf), Yasso.class);
         yasso.setYassoHome(yassoHome);
-        yasso.setOsType(osName.startsWith("Windows") ? OSType.WINDOWS : OSType.LINUX);
         yasso.setJobs(new LinkedHashSet<YassoJob>());
         yasso.setTaskManager(new TaskManager());
         
@@ -77,7 +71,7 @@ public class Yasso {
         File jobConf = new File(yasso.getJobsHome() + "\\" + jobConfName);
         YassoJob job = yaml.loadAs(new FileInputStream(jobConf), YassoJob.class);
         job.setName(name);
-        job.init();
+        job.initialize();
         
         yasso.getJobs().add(job);
         yasso.getTaskManager().remove(job);
@@ -113,14 +107,6 @@ public class Yasso {
 
     public void setJobsHome(String jobsHome) {
         this.jobsHome = jobsHome;
-    }
-
-    public OSType getOsType() {
-        return osType;
-    }
-
-    public void setOsType(OSType osType) {
-        this.osType = osType;
     }
 
     public Set<YassoJob> getJobs() {

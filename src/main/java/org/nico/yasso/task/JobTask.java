@@ -1,7 +1,7 @@
 package org.nico.yasso.task;
 
+import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.pipeline.AbstractPipeline;
-import org.nico.yasso.pipeline.jobs.YassoJob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

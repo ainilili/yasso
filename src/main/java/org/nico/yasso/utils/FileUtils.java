@@ -23,6 +23,13 @@ public class FileUtils {
         }
     }
     
+    public static void createFileOverride(String dir) {
+        File targetDir = new File(dir);
+        if(! targetDir.exists() || ! targetDir.isDirectory()) {
+            targetDir.mkdir();
+        }
+    }
+    
     public static boolean isRelative(String file) {
         if(file.startsWith("/")) {
             return false;

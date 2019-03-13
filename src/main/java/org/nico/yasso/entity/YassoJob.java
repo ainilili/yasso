@@ -44,6 +44,8 @@ public class YassoJob {
         
         workspace = Yasso.getYasso().getWorkspace();
         jobspace = FileUtils.combination(workspace, projectName);
+        
+        
     }
 
     public String getName() {

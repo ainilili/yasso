@@ -6,16 +6,16 @@ import org.nico.yasso.utils.CommandUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PostShellPipeline extends AbstractPipeline{
+public class PreShellPipeline extends AbstractPipeline{
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PostShellPipeline.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PreShellPipeline.class);
     
     @Override
     public void pipeline(YassoJob job) {
         
         String jobspace = job.getJobspace();
 
-        String[] scripts = job.getBuild().getPost().split("\r\n|\n");
+        String[] scripts = job.getBuild().getPre().split("\r\n|\n");
         
         CommandUtils.execute(scripts, jobspace);
         LOGGER.info("Post script execute successful !!");

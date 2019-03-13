@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.pipeline.impl.GitPipeline;
 import org.nico.yasso.pipeline.impl.PostShellPipeline;
+import org.nico.yasso.pipeline.impl.PreShellPipeline;
+import org.nico.yasso.pipeline.impl.ScriptPipeline;
 
 public abstract class AbstractPipeline {
 
@@ -14,6 +16,8 @@ public abstract class AbstractPipeline {
     
     static {
         add(new GitPipeline());
+        add(new ScriptPipeline());
+        add(new PreShellPipeline());
         add(new PostShellPipeline());
     }
     

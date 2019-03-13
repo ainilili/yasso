@@ -24,6 +24,8 @@ public class Yasso {
     
     private String workspace;
     
+    private boolean isUnix;
+    
     private Set<YassoJob> jobs; 
     
     private TaskManager taskManager;
@@ -53,6 +55,7 @@ public class Yasso {
     
     private static void initialize(String conf) throws IOException {
         String yassoHome = System.getProperty("user.dir");
+        String os = System.getProperty("os.name");  
         
         File yassoConf = new File(FileUtils.combination(yassoHome, conf));
         
@@ -60,6 +63,10 @@ public class Yasso {
         yasso.setYassoHome(yassoHome);
         yasso.setJobs(new LinkedHashSet<YassoJob>());
         yasso.setTaskManager(new TaskManager());
+        
+        if(! os.toLowerCase().startsWith("win")){  
+            yasso.setUnix(true);
+        } 
         
         String workspace = yasso.getWorkspace();
         String confspace = yasso.getConfspace();
@@ -131,6 +138,14 @@ public class Yasso {
 
     public void setJobs(Set<YassoJob> jobs) {
         this.jobs = jobs;
+    }
+
+    public boolean isUnix() {
+        return isUnix;
+    }
+
+    public void setUnix(boolean isUnix) {
+        this.isUnix = isUnix;
     }
 
     public String getWorkspace() {

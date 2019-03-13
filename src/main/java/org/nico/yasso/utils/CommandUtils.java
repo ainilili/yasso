@@ -101,7 +101,7 @@ public class CommandUtils {
         }
         return new Result(errMsg, inMsg);
     }
-
+    
     public static class Result{
 
         private String errorMsg;

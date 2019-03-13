@@ -21,6 +21,8 @@ public class YassoJob {
     
     private Context context;
 
+    private volatile boolean scriptBuildFlag;
+    
     public void initialize() {
         String gitUser = git.getUser();
         String gitPwd = git.getPwd();
@@ -44,8 +46,14 @@ public class YassoJob {
         
         workspace = Yasso.getYasso().getWorkspace();
         jobspace = FileUtils.combination(workspace, projectName);
-        
-        
+    }
+
+    public boolean isScriptBuildFlag() {
+        return scriptBuildFlag;
+    }
+
+    public void setScriptBuildFlag(boolean scriptBuildFlag) {
+        this.scriptBuildFlag = scriptBuildFlag;
     }
 
     public String getName() {

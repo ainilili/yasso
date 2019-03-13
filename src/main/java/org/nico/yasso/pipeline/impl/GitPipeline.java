@@ -22,12 +22,12 @@ public class GitPipeline extends AbstractPipeline{
         
         if(! FileUtils.containsFile(workspace, gitName)) {
             CommandUtils.execute("git clone " + gitUrl, workspace);
-        }
-        
-        Result result = CommandUtils.execute("git pull", jobspace);
-        
-        if(! result.getSuccessMsg().contains("Already up to date")) {
             then(job);
+        }else {
+            Result result = CommandUtils.execute("git pull", jobspace);
+            if(! result.getSuccessMsg().startsWith("Already")) {
+                then(job);
+            }
         }
     }
 

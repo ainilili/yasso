@@ -121,12 +121,12 @@ public class Yasso {
                 LOGGER.info("Create job {}, waiting for perfect configuration.", name);
             }
         }catch(Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }finally {
             try {
                 if(confInputStream != null) confInputStream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             }
         }
 

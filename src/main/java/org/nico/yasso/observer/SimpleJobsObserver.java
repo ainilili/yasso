@@ -5,6 +5,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 import org.nico.yasso.Yasso;
+import org.nico.yasso.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,19 +18,20 @@ public class SimpleJobsObserver extends JobsObserver{
     @Override
     protected void event(WatchEvent<?> event) throws IOException {
         String jobConfName = event.context().toString();
-        
-        if(event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-            LOGGER.info("Create：{}", jobConfName);
-            Yasso.loadJob(jobConfName);
-        }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-            modifyCount += event.count();
-            if(modifyCount % 2 == 0) {
-                LOGGER.info("Modify：{}", jobConfName);
+        if(StringUtils.isNotBlank(jobConfName) && jobConfName.endsWith("yml")) {
+            if(event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+                LOGGER.info("Create：{}", jobConfName);
                 Yasso.loadJob(jobConfName);
-            }
-        }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-            LOGGER.info("Remove：{}", jobConfName);
-            Yasso.removeJob(jobConfName);
+            }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
+                modifyCount += event.count();
+                if(modifyCount % 2 == 0) {
+                    LOGGER.info("Modify：{}", jobConfName);
+                    Yasso.loadJob(jobConfName);
+                }
+            }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                LOGGER.info("Remove：{}", jobConfName);
+                Yasso.removeJob(jobConfName);
+            }   
         }
     }
 

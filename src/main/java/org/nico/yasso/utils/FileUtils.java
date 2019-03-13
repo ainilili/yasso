@@ -7,7 +7,11 @@ import java.io.IOException;
 public class FileUtils {
 
     public static String parseName(String file) {
-        return file.substring(0, file.lastIndexOf("."));
+        int index = file.lastIndexOf(".");
+        if(index != -1) {
+            return file.substring(0, index);   
+        }
+        return file;
     }
     
     public static boolean containsFile(String dirPath, String fileName) {

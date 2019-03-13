@@ -18,7 +18,9 @@ public class PreShellPipeline extends AbstractPipeline{
         String[] scripts = job.getBuild().getPre().split("\r\n|\n");
         
         CommandUtils.execute(scripts, jobspace);
-        LOGGER.info("Post script execute successful !!");
+        LOGGER.info("Pre script execute successful !!");
+        
+        then(job);
     }
 
 }

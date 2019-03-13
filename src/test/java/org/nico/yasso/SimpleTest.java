@@ -1,5 +1,8 @@
 package org.nico.yasso;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -20,6 +23,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 public class SimpleTest {
 
@@ -93,5 +97,15 @@ public class SimpleTest {
         System.out.println(gitUrl);
         
         System.out.println(gitUrl.substring(gitUrl.lastIndexOf("/") + 1, gitUrl.lastIndexOf(".")));
+    }
+    
+    @Test
+    public void testYaml() throws FileNotFoundException {
+        Yaml yaml = new Yaml();
+        File f = new File("D:\\yasso\\snails.yml");
+        YassoJob job = yaml.loadAs(new FileInputStream(f), YassoJob.class);
+        
+        String post = job.getBuild().getPost();
+        System.out.println(post);
     }
 }

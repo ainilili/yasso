@@ -11,6 +11,7 @@ import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.observer.SimpleJobsObserver;
 import org.nico.yasso.task.TaskManager;
 import org.nico.yasso.utils.FileUtils;
+import org.nico.yasso.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -19,7 +20,7 @@ public class Yasso {
 
     private String yassoHome;
     
-    private String jobsHome;
+    private String confspace;
     
     private String workspace;
     
@@ -53,13 +54,28 @@ public class Yasso {
     private static void initialize(String conf) throws IOException {
         String yassoHome = System.getProperty("user.dir");
         
-        File yassoConf = new File(yassoHome + "\\" + conf);
+        File yassoConf = new File(FileUtils.combination(yassoHome, conf));
+        
         yasso = yaml.loadAs(new FileInputStream(yassoConf), Yasso.class);
         yasso.setYassoHome(yassoHome);
         yasso.setJobs(new LinkedHashSet<YassoJob>());
         yasso.setTaskManager(new TaskManager());
         
-        new SimpleJobsObserver().observe(yasso.getJobsHome());
+        String workspace = yasso.getWorkspace();
+        String confspace = yasso.getConfspace();
+        
+        if(StringUtils.isNotBlank(workspace)) {
+            yasso.setWorkspace(FileUtils.isRelative(workspace) ? FileUtils.combination(yassoHome, workspace) : workspace);
+        }
+        if(StringUtils.isNotBlank(confspace)) {
+            yasso.setConfspace(FileUtils.isRelative(confspace) ? FileUtils.combination(yassoHome, confspace) : confspace);
+        }
+        
+        LOGGER.info("Yasso load with {}", yasso);
+        FileUtils.createDirIfAbsent(yasso.getWorkspace());
+        FileUtils.createDirIfAbsent(yasso.getConfspace());
+        
+        new SimpleJobsObserver().observe(yasso.getConfspace());
     }
     
     public static void loadJob(String jobConfName) throws FileNotFoundException {
@@ -68,7 +84,7 @@ public class Yasso {
         }
         String name = FileUtils.parseName(jobConfName);
         
-        File jobConf = new File(yasso.getJobsHome() + "\\" + jobConfName);
+        File jobConf = new File(FileUtils.combination(yasso.getConfspace(), jobConfName));
         YassoJob job = yaml.loadAs(new FileInputStream(jobConf), YassoJob.class);
         job.setName(name);
         job.initialize();
@@ -101,12 +117,12 @@ public class Yasso {
         this.yassoHome = yassoHome;
     }
 
-    public String getJobsHome() {
-        return jobsHome;
+    public String getConfspace() {
+        return confspace;
     }
 
-    public void setJobsHome(String jobsHome) {
-        this.jobsHome = jobsHome;
+    public void setConfspace(String confspace) {
+        this.confspace = confspace;
     }
 
     public Set<YassoJob> getJobs() {
@@ -131,6 +147,11 @@ public class Yasso {
 
     public void setTaskManager(TaskManager taskManager) {
         this.taskManager = taskManager;
+    }
+
+    @Override
+    public String toString() {
+        return "Yasso [yassoHome=" + yassoHome + ", confspace=" + confspace + ", workspace=" + workspace + "]";
     }
     
 }

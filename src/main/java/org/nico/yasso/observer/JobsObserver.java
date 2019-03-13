@@ -42,7 +42,6 @@ public abstract class JobsObserver {
             throw new IOException(dir + " is not a directory !");
         }
         
-        
         OBSERVER_SERVICE.execute(() -> {
             while(true){  
                 WatchKey watchKey = null;

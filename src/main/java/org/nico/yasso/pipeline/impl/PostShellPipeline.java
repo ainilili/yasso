@@ -13,10 +13,11 @@ public class PostShellPipeline extends AbstractPipeline{
     @Override
     public void pipeline(YassoJob job) {
         
-        String gitName = job.getName();
         String jobspace = job.getJobspace();
+
+        String[] scripts = job.getBuild().getPost().split("\r\n|\n");
         
-        CommandUtils.execute(job.getBuild().getPost(), jobspace);
+        CommandUtils.execute(scripts, jobspace);
     }
 
 }

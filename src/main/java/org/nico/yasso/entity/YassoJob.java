@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.nico.yasso.Yasso;
+import org.nico.yasso.utils.FileUtils;
 import org.nico.yasso.utils.StringUtils;
 
 public class YassoJob {
@@ -42,7 +43,7 @@ public class YassoJob {
         context = new Context();
         
         workspace = Yasso.getYasso().getWorkspace();
-        jobspace = workspace + "\\" + projectName;
+        jobspace = FileUtils.combination(workspace, projectName);
     }
 
     public String getName() {

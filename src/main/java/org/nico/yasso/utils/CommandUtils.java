@@ -28,7 +28,6 @@ public class CommandUtils {
         Result[] results = new Result[scripts.length];
         int index = 0;
         for(String script: scripts) {
-            LOGGER.info("+ " + script);
             results[index ++] = execute(script, dir);
         }
         return results;  

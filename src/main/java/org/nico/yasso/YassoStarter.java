@@ -11,7 +11,7 @@ public class YassoStarter {
         if(args != null && args.length > 0 && args.length % 2 == 0) {
             for(int index = 0; index < args.length; index = index + 2) {
                 if(args[index].equals("-c")) {
-                    conf = args[index] + 1;
+                    conf = args[index + 1];
                 }
             }
         }

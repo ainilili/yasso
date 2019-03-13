@@ -93,14 +93,23 @@ public class Yasso {
         
         File jobConf = new File(FileUtils.combination(yasso.getConfspace(), jobConfName));
         YassoJob job = yaml.loadAs(new FileInputStream(jobConf), YassoJob.class);
-        job.setName(name);
-        job.initialize();
-        
-        yasso.getJobs().add(job);
-        yasso.getTaskManager().remove(job);
-        yasso.getTaskManager().create(job);
-        
-        LOGGER.info("Create job：" + job);
+        if(job != null) {
+            if(job.getBuild() == null) {
+                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "build{cron, pre, post}");
+            }else if(job.getGit() == null) {
+                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "get{url, [user], [pwd]}");
+            }else {
+                job.setName(name);
+                job.initialize();
+                
+                yasso.getJobs().add(job);
+                yasso.getTaskManager().remove(job);
+                yasso.getTaskManager().create(job);
+                LOGGER.info("Create job {} successful !!", name);
+            }
+        }else {
+            LOGGER.info("Create job {}, waiting for perfect configuration.", name);
+        }
     }
     
     public static void removeJob(String jobConfName) {

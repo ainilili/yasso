@@ -1,10 +1,8 @@
 package org.nico.yasso.utils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,24 +31,76 @@ public class CommandUtils {
         return results;  
     }
 
-    public static String readStream(InputStream inputStream) throws IOException {
-        StringBuffer sb = new StringBuffer(); 
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "GBK")); 
-        String line = null; 
-        while ((line = br.readLine()) != null) { 
-            sb.append(line).append("\n"); 
-            LOGGER.info(line);
-        }
-        return sb.toString();
-    }
+    //    public static String readStream(InputStream inputStream) throws IOException {
+    //        StringBuffer sb = new StringBuffer(); 
+    //        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "GBK")); 
+    //        String line = null; 
+    //        while ((line = br.readLine()) != null) { 
+    //            sb.append(line).append("\n"); 
+    //            LOGGER.info(line);
+    //        }
+    //        return sb.toString();
+    //    }
 
-    @SuppressWarnings("static-access")
+    //    @SuppressWarnings("static-access")
+    //    public static Result doWaitFor(Process process) {
+    //        InputStream in = null;
+    //        InputStream err = null;
+    //
+    //        String inMsg = null;
+    //        String errMsg = null;
+    //
+    //        try {
+    //            in = process.getInputStream();
+    //            err = process.getErrorStream();
+    //
+    //            boolean finished = false; // Set to true when p is finished
+    //            while (!finished) {
+    //                try {
+    //                    System.out.println("read...");
+    //                    inMsg = readStream(in);
+    //                    errMsg = readStream(err);
+    //                    System.out.println("read... end");
+    //                    // Ask the process for its exitValue. If the process
+    //                    // is not finished, an IllegalThreadStateException
+    //                    // is thrown. If it is finished, we fall through and
+    //                    // the variable finished is set to true.
+    //                    int value = process.exitValue();
+    //                    System.out.println("value...：" + value);
+    //                    finished = true;
+    //                } catch (IllegalThreadStateException e) {
+    //                    // Process is not finished yet;
+    //                    // Sleep a little to save on CPU cycles
+    //                    System.out.println("exec...：" + e.getMessage());
+    //                    Thread.currentThread().sleep(500);
+    //                }
+    //            }
+    //        } catch (Exception e) {
+    //        } finally {
+    //            try {
+    //                if (in != null) {
+    //                    in.close();
+    //                }
+    //            } catch (IOException e) {
+    //                e.printStackTrace();
+    //            }
+    //            if (err != null) {
+    //                try {
+    //                    err.close();
+    //                } catch (IOException e) {
+    //                    e.printStackTrace();
+    //                }
+    //            }
+    //        }
+    //        return new Result(errMsg, inMsg);
+    //    }
+
     public static Result doWaitFor(Process process) {
         InputStream in = null;
         InputStream err = null;
 
-        String inMsg = null;
-        String errMsg = null;
+        StringBuilder inMsg = new StringBuilder();
+        StringBuilder errMsg = new StringBuilder();
 
         try {
             in = process.getInputStream();
@@ -59,25 +109,32 @@ public class CommandUtils {
             boolean finished = false; // Set to true when p is finished
             while (!finished) {
                 try {
-                    System.out.println("read...");
-                    inMsg = readStream(in);
-                    errMsg = readStream(err);
-                    System.out.println("read... end");
+                    while (in.available() > 0) {
+                        // Print the output of our system call
+                        Character c = new Character((char) in.read());
+                        inMsg.append(c);
+                        System.out.print(c);
+                    }
+                    while (err.available() > 0) {
+                        // Print the output of our system call
+                        Character c = new Character((char) err.read());
+                        errMsg.append(c);
+                        System.out.print(c);
+                    }
                     // Ask the process for its exitValue. If the process
                     // is not finished, an IllegalThreadStateException
                     // is thrown. If it is finished, we fall through and
                     // the variable finished is set to true.
-                    int value = process.exitValue();
-                    System.out.println("value...：" + value);
+                    process.exitValue();
                     finished = true;
                 } catch (IllegalThreadStateException e) {
                     // Process is not finished yet;
                     // Sleep a little to save on CPU cycles
-                    System.out.println("exec...：" + e.getMessage());
-                    Thread.currentThread().sleep(500);
+                    Thread.sleep(500);
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             try {
                 if (in != null) {
@@ -94,9 +151,9 @@ public class CommandUtils {
                 }
             }
         }
-        return new Result(errMsg, inMsg);
+        return new Result(errMsg.toString(), inMsg.toString());
     }
-    
+
     public static class Result{
 
         private String errorMsg;

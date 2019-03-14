@@ -62,6 +62,7 @@ public class CommandUtils {
                     System.out.println("read...");
                     inMsg = readStream(in);
                     errMsg = readStream(err);
+                    System.out.println("read... end");
                     // Ask the process for its exitValue. If the process
                     // is not finished, an IllegalThreadStateException
                     // is thrown. If it is finished, we fall through and

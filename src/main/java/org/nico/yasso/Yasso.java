@@ -1,8 +1,5 @@
 package org.nico.yasso;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,7 +13,6 @@ import org.nico.yasso.utils.StringUtils;
 import org.nico.yasso.utils.YamlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 public class Yasso {
 
@@ -33,8 +29,6 @@ public class Yasso {
     private TaskManager taskManager;
 
     private volatile static Yasso yasso;
-
-    private static Yaml yaml = new Yaml();
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Yasso.class);
 
@@ -64,18 +58,9 @@ public class Yasso {
         if(yasso == null) {
             throw new MissingException("Missing profile.");
         }
-        
-        yasso.setYassoHome(yassoHome);
-        yasso.setJobs(new LinkedHashSet<YassoJob>());
-        yasso.setTaskManager(new TaskManager());
-
-        if(! os.toLowerCase().startsWith("win")){  
-            yasso.setUnix(true);
-        } 
-
         String workspace = yasso.getWorkspace();
         String confspace = yasso.getConfspace();
-
+        
         if(StringUtils.isNotBlank(workspace)) {
             yasso.setWorkspace(FileUtils.isRelative(workspace) ? FileUtils.combination(yassoHome, workspace) : workspace);
         }else {
@@ -87,11 +72,16 @@ public class Yasso {
         }else {
             throw new MissingException("Missing [confspace] configuration parameter.");
         }
-
+        
+        yasso.setYassoHome(yassoHome);
+        yasso.setJobs(new LinkedHashSet<YassoJob>());
+        yasso.setTaskManager(new TaskManager());
+        yasso.setUnix(! os.toLowerCase().startsWith("win"));
         LOGGER.info("Yasso load with {}", yasso);
+        
         FileUtils.createDirIfAbsent(yasso.getWorkspace());
         FileUtils.createDirIfAbsent(yasso.getConfspace());
-
+        
         new SimpleJobsObserver().observe(yasso.getConfspace());
     }
 

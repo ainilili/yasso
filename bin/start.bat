@@ -1,4 +1,3 @@
 cd ..
-mvn clean install
-nohup java -jar target/yasso.jar -c yasso-conf.yml > yasso.log &
+mvn clean install && java -jar target/yasso.jar -c yasso-conf.yml
 echo Yasso Bootup Successful !!

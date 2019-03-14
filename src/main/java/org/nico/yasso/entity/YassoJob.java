@@ -23,6 +23,13 @@ public class YassoJob {
 
     private volatile boolean scriptBuildFlag;
     
+    public YassoJob() {
+    }
+
+    public YassoJob(String name) {
+        this.name = name;
+    }
+
     public void initialize() {
         String gitUser = git.getUser();
         String gitPwd = git.getPwd();

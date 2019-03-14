@@ -57,12 +57,12 @@ public class TaskManager {
 
     }
 
-    public void remove(YassoJob job) {
-        JobDetail jobDetail = taskMap.remove(job.getName());
+    public void remove(String name) {
+        JobDetail jobDetail = taskMap.remove(name);
         if(jobDetail != null) {
             try {
                 scheduler.deleteJob(jobDetail.getKey());
-                LOGGER.info("Task remove job [{}]", job.getName());
+                LOGGER.info("Task remove job [{}]", name);
             } catch (SchedulerException e) {
                 e.printStackTrace();
             }

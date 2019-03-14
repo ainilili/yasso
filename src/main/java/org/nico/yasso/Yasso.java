@@ -1,6 +1,8 @@
 package org.nico.yasso;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -82,6 +84,16 @@ public class Yasso {
         FileUtils.createDirIfAbsent(yasso.getWorkspace());
         FileUtils.createDirIfAbsent(yasso.getConfspace());
         
+        File confspaceDir = new File(confspace);
+        Arrays.asList(confspaceDir.list()).stream().filter(FileUtils::isYaml).forEach(name -> {
+            try {
+                LOGGER.info("Load the job configuration file {}", name);
+                loadJob(name);
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage());
+            }
+        });
+        
         new SimpleJobsObserver().observe(yasso.getConfspace());
     }
 
@@ -92,22 +104,20 @@ public class Yasso {
         String name = FileUtils.parseFileName(jobConfName);
 
         YassoJob job = YamlUtils.loadAs(FileUtils.combination(yasso.getConfspace(), jobConfName), YassoJob.class);
-        if(job != null) {
-            if(job.getBuild() == null) {
-                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "build{cron, pre, post}");
-            }else if(job.getGit() == null) {
-                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "get{url, [user], [pwd]}");
-            }else {
-                job.setName(name);
-                job.initialize();
-
-                yasso.getJobs().add(job);
-                yasso.getTaskManager().remove(job);
-                yasso.getTaskManager().create(job);
-                LOGGER.info("Create job {} successful !!", name);
-            }
-        }else {
+        if(job == null) {
             LOGGER.info("Create job {}, waiting for perfect configuration.", name);
+        }else if(job.getBuild() == null) {
+            LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "build{cron, pre, post}");
+        }else if(job.getGit() == null) {
+            LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "get{url, [user], [pwd]}");
+        }else {
+            job.setName(name);
+            job.initialize();
+
+            yasso.getJobs().add(job);
+            yasso.getTaskManager().remove(name);
+            yasso.getTaskManager().create(job);
+            LOGGER.info("Create job {} successful !!", name);
         }
     }
 
@@ -115,13 +125,12 @@ public class Yasso {
         if(yasso == null) {
             throw new NullPointerException("Yasso need initialize !");
         }
+        
         String name = FileUtils.parseFileName(jobConfName);
-        YassoJob tempJob = new YassoJob();
-        tempJob.setName(name);
-        yasso.getJobs().remove(tempJob);
-        yasso.getTaskManager().remove(tempJob);
-
-        LOGGER.info("Remove job：" + tempJob);
+        
+        yasso.getJobs().remove(new YassoJob(name));
+        yasso.getTaskManager().remove(name);
+        LOGGER.info("Remove job：" + name);
     }
 
     public String getYassoHome() {

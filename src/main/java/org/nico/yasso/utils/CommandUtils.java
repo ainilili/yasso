@@ -59,17 +59,20 @@ public class CommandUtils {
             boolean finished = false; // Set to true when p is finished
             while (!finished) {
                 try {
+                    System.out.println("read...");
                     inMsg = readStream(in);
                     errMsg = readStream(err);
                     // Ask the process for its exitValue. If the process
                     // is not finished, an IllegalThreadStateException
                     // is thrown. If it is finished, we fall through and
                     // the variable finished is set to true.
-                    process.exitValue();
+                    int value = process.exitValue();
+                    System.out.println("value...：" + value);
                     finished = true;
                 } catch (IllegalThreadStateException e) {
                     // Process is not finished yet;
                     // Sleep a little to save on CPU cycles
+                    System.out.println("exec...：" + e.getMessage());
                     Thread.currentThread().sleep(500);
                 }
             }

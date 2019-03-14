@@ -30,10 +30,12 @@ public class FileUtils {
         return false;
     }
     
-    public static void createDirIfAbsent(String dir) {
+    public static void createDirIfAbsent(String dir) throws IOException {
         File targetDir = new File(dir);
         if(! targetDir.exists() || ! targetDir.isDirectory()) {
-            targetDir.mkdir();
+            if(! targetDir.mkdirs()) {
+                throw new IOException("Create [" + dir + "] failure !");
+            }
         }
     }
     

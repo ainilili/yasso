@@ -1,12 +1,8 @@
 package org.nico.yasso;
 
-import java.io.IOException;
-
-import org.nico.yasso.exceptions.YassoException;
-
 public class YassoStarter {
 
-    public static void main(String[] args) throws IOException, YassoException {
+    public static void main(String[] args) {
         
         String conf = "yasso-conf.yml";
         
@@ -18,7 +14,12 @@ public class YassoStarter {
             }
         }
         
-        Yasso.getInstance(conf);
+        try {
+            Yasso.getInstance(conf);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
         
     }
 }

@@ -2,9 +2,11 @@ package org.nico.yasso;
 
 import java.io.IOException;
 
+import org.nico.yasso.exceptions.YassoException;
+
 public class YassoStarter {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, YassoException {
         
         String conf = "yasso-conf.yml";
         

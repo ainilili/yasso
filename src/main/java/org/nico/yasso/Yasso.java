@@ -8,10 +8,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.nico.yasso.entity.YassoJob;
+import org.nico.yasso.exceptions.MissingException;
 import org.nico.yasso.observer.SimpleJobsObserver;
 import org.nico.yasso.task.TaskManager;
 import org.nico.yasso.utils.FileUtils;
 import org.nico.yasso.utils.StringUtils;
+import org.nico.yasso.utils.YamlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -38,7 +40,7 @@ public class Yasso {
 
     private Yasso() { }
 
-    public static Yasso getInstance(String conf) throws IOException {
+    public static Yasso getInstance(String conf) throws IOException, MissingException {
         if(yasso == null) {
             synchronized (Yasso.class) {
                 if(yasso == null) {
@@ -53,83 +55,70 @@ public class Yasso {
         return yasso;
     }
 
-    private static void initialize(String conf) throws IOException {
+    private static void initialize(String conf) throws IOException, MissingException {
         String yassoHome = System.getProperty("user.dir");
         String os = System.getProperty("os.name");  
 
-        FileInputStream yassoInputStream = null;
-        try {
-            File yassoConf = new File(FileUtils.combination(yassoHome, conf));
-            yassoInputStream = new FileInputStream(yassoConf);
-            
-            yasso = yaml.loadAs(yassoInputStream, Yasso.class);
-            yasso.setYassoHome(yassoHome);
-            yasso.setJobs(new LinkedHashSet<YassoJob>());
-            yasso.setTaskManager(new TaskManager());
-
-            if(! os.toLowerCase().startsWith("win")){  
-                yasso.setUnix(true);
-            } 
-
-            String workspace = yasso.getWorkspace();
-            String confspace = yasso.getConfspace();
-
-            if(StringUtils.isNotBlank(workspace)) {
-                yasso.setWorkspace(FileUtils.isRelative(workspace) ? FileUtils.combination(yassoHome, workspace) : workspace);
-            }
-            if(StringUtils.isNotBlank(confspace)) {
-                yasso.setConfspace(FileUtils.isRelative(confspace) ? FileUtils.combination(yassoHome, confspace) : confspace);
-            }
-
-            LOGGER.info("Yasso load with {}", yasso);
-            FileUtils.createDirIfAbsent(yasso.getWorkspace());
-            FileUtils.createDirIfAbsent(yasso.getConfspace());
-
-            new SimpleJobsObserver().observe(yasso.getConfspace());
-        }finally {
-            if(yassoInputStream != null) yassoInputStream.close();
+        yasso = YamlUtils.loadAs(FileUtils.combination(yassoHome, conf), Yasso.class);
+        
+        if(yasso == null) {
+            throw new MissingException("Missing profile.");
         }
+        
+        yasso.setYassoHome(yassoHome);
+        yasso.setJobs(new LinkedHashSet<YassoJob>());
+        yasso.setTaskManager(new TaskManager());
+
+        if(! os.toLowerCase().startsWith("win")){  
+            yasso.setUnix(true);
+        } 
+
+        String workspace = yasso.getWorkspace();
+        String confspace = yasso.getConfspace();
+
+        if(StringUtils.isNotBlank(workspace)) {
+            yasso.setWorkspace(FileUtils.isRelative(workspace) ? FileUtils.combination(yassoHome, workspace) : workspace);
+        }else {
+            throw new MissingException("Missing [workspace] configuration parameter.");
+        }
+
+        if(StringUtils.isNotBlank(confspace)) {
+            yasso.setConfspace(FileUtils.isRelative(confspace) ? FileUtils.combination(yassoHome, confspace) : confspace);
+        }else {
+            throw new MissingException("Missing [confspace] configuration parameter.");
+        }
+
+        LOGGER.info("Yasso load with {}", yasso);
+        FileUtils.createDirIfAbsent(yasso.getWorkspace());
+        FileUtils.createDirIfAbsent(yasso.getConfspace());
+
+        new SimpleJobsObserver().observe(yasso.getConfspace());
     }
 
-    public static void loadJob(String jobConfName) throws FileNotFoundException {
+    public static void loadJob(String jobConfName) throws IOException {
         if(yasso == null) {
             throw new NullPointerException("Yasso need initialize !");
         }
-        FileInputStream confInputStream = null;
-        try {
-            String name = FileUtils.parseName(jobConfName);
-            
-            File jobConf = new File(FileUtils.combination(yasso.getConfspace(), jobConfName));
-            
-            confInputStream = new FileInputStream(jobConf);
-            YassoJob job = yaml.loadAs(confInputStream, YassoJob.class);
-            if(job != null) {
-                if(job.getBuild() == null) {
-                    LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "build{cron, pre, post}");
-                }else if(job.getGit() == null) {
-                    LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "get{url, [user], [pwd]}");
-                }else {
-                    job.setName(name);
-                    job.initialize();
+        String name = FileUtils.parseName(jobConfName);
 
-                    yasso.getJobs().add(job);
-                    yasso.getTaskManager().remove(job);
-                    yasso.getTaskManager().create(job);
-                    LOGGER.info("Create job {} successful !!", name);
-                }
+        YassoJob job = YamlUtils.loadAs(FileUtils.combination(yasso.getConfspace(), jobConfName), YassoJob.class);
+        if(job != null) {
+            if(job.getBuild() == null) {
+                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "build{cron, pre, post}");
+            }else if(job.getGit() == null) {
+                LOGGER.info("Create job {}, waiting for perfect configuration {}", name, "get{url, [user], [pwd]}");
             }else {
-                LOGGER.info("Create job {}, waiting for perfect configuration.", name);
-            }
-        }catch(Exception e) {
-            LOGGER.error(e.getMessage());
-        }finally {
-            try {
-                if(confInputStream != null) confInputStream.close();
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
+                job.setName(name);
+                job.initialize();
 
+                yasso.getJobs().add(job);
+                yasso.getTaskManager().remove(job);
+                yasso.getTaskManager().create(job);
+                LOGGER.info("Create job {} successful !!", name);
+            }
+        }else {
+            LOGGER.info("Create job {}, waiting for perfect configuration.", name);
+        }
     }
 
     public static void removeJob(String jobConfName) {

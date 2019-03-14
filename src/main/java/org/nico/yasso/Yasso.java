@@ -89,7 +89,7 @@ public class Yasso {
         if(yasso == null) {
             throw new NullPointerException("Yasso need initialize !");
         }
-        String name = FileUtils.parseName(jobConfName);
+        String name = FileUtils.parseFileName(jobConfName);
 
         YassoJob job = YamlUtils.loadAs(FileUtils.combination(yasso.getConfspace(), jobConfName), YassoJob.class);
         if(job != null) {
@@ -115,7 +115,7 @@ public class Yasso {
         if(yasso == null) {
             throw new NullPointerException("Yasso need initialize !");
         }
-        String name = FileUtils.parseName(jobConfName);
+        String name = FileUtils.parseFileName(jobConfName);
         YassoJob tempJob = new YassoJob();
         tempJob.setName(name);
         yasso.getJobs().remove(tempJob);

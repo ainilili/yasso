@@ -6,12 +6,14 @@ import java.io.IOException;
 
 public class FileUtils {
 
-    public static String parseName(String file) {
-        int index = file.lastIndexOf(".");
-        if(index != -1) {
-            return file.substring(0, index);   
-        }
-        return file;
+    public static final String separator = File.separator;
+    
+    public static String parseFileName(String file) {
+        int startIndex = file.lastIndexOf(separator);
+        int endIndex = file.lastIndexOf(".");
+        startIndex += separator.length();
+        if(endIndex < 0) endIndex = file.length();
+        return file.substring(startIndex, endIndex);
     }
     
     public static boolean containsFile(String dirPath, String fileName) {
@@ -72,23 +74,23 @@ public class FileUtils {
     }
     
     public static boolean isRelative(String file) {
-        if(file.startsWith("/")) {
-            return false;
-        }
-        if(file.matches("[a-zA-Z]://(.*)")) {
-            return false;
-        }
+        if(file.startsWith("/")) return false;
+        if(file.matches("[a-zA-Z]:\\\\(.*)")) return false;
         return true;
     }
     
     public static String combination(String pre, String after) {
-        if(after.startsWith(File.separator)) {
-            after = after.substring(File.separator.length());
+        if(after.startsWith(separator)) {
+            after = after.substring(separator.length());
         }
-        
-        if(! pre.endsWith(File.separator)) {
-            pre += File.separator;
+        if(! pre.endsWith(separator)) {
+            pre += separator;
         }
         return pre + after;
     }
+    
+    public static boolean isYaml(String fileName) {
+        return fileName.endsWith(".yml") || fileName.endsWith(".yaml");
+    }
+    
 }

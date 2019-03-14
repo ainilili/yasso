@@ -15,11 +15,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.nico.yasso.Yasso;
-
-import com.sun.nio.file.SensitivityWatchEventModifier;
+import org.nico.yasso.utils.FileUtils;
+import org.nico.yasso.utils.StringUtils;
 
 public abstract class JobsObserver {
 
+    private volatile int modifyCount = 0;
+    
     protected final static ThreadPoolExecutor OBSERVER_SERVICE = new ThreadPoolExecutor(10, 50, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 
     public void observe(String dir) throws IOException {
@@ -27,11 +29,11 @@ public abstract class JobsObserver {
         Path p = Paths.get(dir);
         p.register(watchService, new WatchEvent.Kind[]
                 {StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE}, SensitivityWatchEventModifier.HIGH);
+                        StandardWatchEventKinds.ENTRY_DELETE});
 
         File targetDir = new File(dir);
         if(targetDir.exists() && targetDir.isDirectory()) {
-            String[] fileNames = targetDir.list((dirPath, name) -> name.endsWith(".yml"));
+            String[] fileNames = targetDir.list((dirPath, name) -> FileUtils.isYaml(name));
             if(fileNames != null) {
                 for(String fileName: fileNames) {
                     Yasso.loadJob(fileName);
@@ -48,7 +50,19 @@ public abstract class JobsObserver {
                     watchKey = watchService.take();  
                     List<WatchEvent<?>> watchEvents = watchKey.pollEvents();  
                     for(WatchEvent<?> event : watchEvents){  
-                        event(event);
+                        String jobConfName = event.context().toString();
+                        if(StringUtils.isNotBlank(jobConfName) && FileUtils.isYaml(jobConfName)) {
+                            if(event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+                                createEvent(event);
+                            }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
+                                modifyCount += event.count();
+                                if(modifyCount % 2 == 0) {
+                                    modifyEvent(event);
+                                }
+                            }else if(event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+                                deleteEvent(event);
+                            }   
+                        }
                     }  
                     watchKey.reset();  
                 }catch(Exception e) {
@@ -66,5 +80,9 @@ public abstract class JobsObserver {
         }));
     }
 
-    protected abstract void event(WatchEvent<?> event) throws Exception;
+    protected abstract void createEvent(WatchEvent<?> event) throws Exception;
+    
+    protected abstract void modifyEvent(WatchEvent<?> event) throws Exception;
+    
+    protected abstract void deleteEvent(WatchEvent<?> event) throws Exception;
 }

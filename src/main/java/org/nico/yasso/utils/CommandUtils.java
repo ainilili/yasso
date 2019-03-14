@@ -17,7 +17,7 @@ public class CommandUtils {
         try {
             LOGGER.info("+ " + script);
             Process process = Runtime.getRuntime().exec(script, null, new File(dir));
-            return getResult(process);
+            return doWaitFor(process);
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -32,14 +32,6 @@ public class CommandUtils {
         }
         return results;  
     }
-
-    private static Result getResult(Process process) throws InterruptedException, IOException {
-        process.waitFor();
-        InputStream errorStream = process.getErrorStream();
-        InputStream successStream = process.getInputStream();
-        return new Result(readStream(errorStream), readStream(successStream)); 
-
-    }  
 
     public static String readStream(InputStream inputStream) throws IOException {
         StringBuffer sb = new StringBuffer(); 
@@ -61,7 +53,6 @@ public class CommandUtils {
         String errMsg = null;
 
         try {
-
             in = process.getInputStream();
             err = process.getErrorStream();
 

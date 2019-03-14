@@ -8,12 +8,18 @@ public class FileUtils {
 
     public static final String separator = File.separator;
     
-    public static String parseFileName(String file) {
-        int startIndex = file.lastIndexOf(separator);
-        int endIndex = file.lastIndexOf(".");
+    public static String parseFileName(String filePath) {
+        int startIndex = filePath.lastIndexOf(separator);
+        int endIndex = filePath.lastIndexOf(".");
         startIndex += separator.length();
-        if(endIndex < 0) endIndex = file.length();
-        return file.substring(startIndex, endIndex);
+        if(endIndex < 0) endIndex = filePath.length();
+        return filePath.substring(startIndex, endIndex);
+    }
+    
+    public static String parseFileNameWithSuffix(String filePath) {
+        int startIndex = filePath.lastIndexOf(separator);
+        startIndex += separator.length();
+        return filePath.substring(startIndex);
     }
     
     public static boolean containsFile(String dirPath, String fileName) {

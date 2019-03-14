@@ -14,7 +14,7 @@ public class SimpleJobsObserver extends JobsObserver{
 
     @Override
     protected void createEvent(WatchEvent<?> event) throws Exception {
-        String fileName = FileUtils.parseFileName(event.context().toString());
+        String fileName = FileUtils.parseFileNameWithSuffix(event.context().toString());
         LOGGER.info("Job config monitor system [CREATION] event triggered -> {}", fileName);
         
         Yasso.loadJob(fileName);
@@ -22,7 +22,7 @@ public class SimpleJobsObserver extends JobsObserver{
 
     @Override
     protected void modifyEvent(WatchEvent<?> event) throws Exception {
-        String fileName = FileUtils.parseFileName(event.context().toString());
+        String fileName = FileUtils.parseFileNameWithSuffix(event.context().toString());
         LOGGER.info("Job config monitor system [MODIFY] event triggered -> {}", fileName);
         
         Yasso.loadJob(fileName);
@@ -30,7 +30,7 @@ public class SimpleJobsObserver extends JobsObserver{
 
     @Override
     protected void deleteEvent(WatchEvent<?> event) throws Exception {
-        String fileName = FileUtils.parseFileName(event.context().toString());
+        String fileName = FileUtils.parseFileNameWithSuffix(event.context().toString());
         LOGGER.info("Job config monitor system [DELETE] event triggered -> {}", fileName);
         
         Yasso.removeJob(fileName);

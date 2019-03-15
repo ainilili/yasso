@@ -1,7 +1,6 @@
 package org.nico.yasso;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -36,7 +35,7 @@ public class Yasso {
 
     private Yasso() { }
 
-    public static Yasso getInstance(String conf) throws IOException, MissingException {
+    public static Yasso getInstance(String conf) throws Exception {
         if(yasso == null) {
             synchronized (Yasso.class) {
                 if(yasso == null) {
@@ -51,7 +50,7 @@ public class Yasso {
         return yasso;
     }
 
-    private static void initialize(String conf) throws IOException, MissingException {
+    private static void initialize(String conf) throws Exception {
         String yassoHome = System.getProperty("user.dir");
         String os = System.getProperty("os.name");  
 
@@ -89,7 +88,7 @@ public class Yasso {
             try {
                 LOGGER.info("Load the job configuration file {}", name);
                 loadJob(name);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error(e.getMessage());
             }
         });
@@ -97,7 +96,7 @@ public class Yasso {
         new SimpleJobsObserver().observe(yasso.getConfspace());
     }
 
-    public static void loadJob(String jobConfName) throws IOException {
+    public static void loadJob(String jobConfName) throws Exception {
         if(yasso == null) {
             throw new NullPointerException("Yasso need initialize !");
         }

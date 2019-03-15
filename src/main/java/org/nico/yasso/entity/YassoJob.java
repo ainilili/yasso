@@ -4,16 +4,22 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.nico.yasso.Yasso;
+import org.nico.yasso.plugins.AbstractPlugins;
+import org.nico.yasso.plugins.GitPlugins;
 import org.nico.yasso.utils.FileUtils;
 import org.nico.yasso.utils.StringUtils;
 
 public class YassoJob {
 
+    private String pluginsClass;
+    
     private String name;
     
     private String workspace;
     
     private String jobspace;
+    
+    private AbstractPlugins plugins;
 
     private Git git;
     
@@ -30,29 +36,18 @@ public class YassoJob {
         this.name = name;
     }
 
-    public void initialize() {
-        String gitUser = git.getUser();
-        String gitPwd = git.getPwd();
-        String gitUrl = git.getUrl();
-        String projectName = null;
-        
-        if(StringUtils.isNotBlank(gitUser)
-                && StringUtils.isNotBlank(gitPwd)) {
-            String sign = gitUser + ":" + gitPwd + "@";
-            int httpFlag = gitUrl.indexOf("://");
-            httpFlag += 3;
-            gitUrl = gitUrl.substring(0, httpFlag) + sign + gitUrl.substring(httpFlag);
+    public void initialize() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        if(StringUtils.isBlank(pluginsClass)) {
+            plugins = new GitPlugins();
+        }else {
+            plugins = (AbstractPlugins) Class.forName(pluginsClass).newInstance();
         }
-
-        projectName = gitUrl.substring(gitUrl.lastIndexOf("/") + 1, gitUrl.lastIndexOf("."));
-        
-        git.setName(projectName);
-        git.setUrl(gitUrl);
         
         context = new Context();
-        
         workspace = Yasso.getYasso().getWorkspace();
-        jobspace = FileUtils.combination(workspace, projectName);
+        
+        plugins.initialize();
+        plugins.check(this);
     }
 
     public boolean isScriptBuildFlag() {
@@ -81,6 +76,22 @@ public class YassoJob {
 
     public Build getBuild() {
         return build;
+    }
+
+    public String getPluginsClass() {
+        return pluginsClass;
+    }
+
+    public void setPluginsClass(String pluginsClass) {
+        this.pluginsClass = pluginsClass;
+    }
+
+    public AbstractPlugins getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(AbstractPlugins plugins) {
+        this.plugins = plugins;
     }
 
     public void setBuild(Build build) {
@@ -122,6 +133,16 @@ public class YassoJob {
         
         private String name;
         
+        private String branch;
+        
+        public String getBranch() {
+            return branch;
+        }
+
+        public void setBranch(String branch) {
+            this.branch = branch;
+        }
+
         public String getName() {
             return name;
         }

@@ -12,7 +12,7 @@ public class GitPullPipeline extends AbstractPipeline{
 
         String jobspace = job.getJobspace();
 
-        Result result = CommandUtils.execute("git pull --progress -v --no-rebase \"origin\" " + job.getGit().getBranch(), jobspace);
+        Result result = CommandUtils.execute("git pull --progress -v --no-rebase origin " + job.getGit().getBranch(), jobspace);
         if(! result.getSuccessMsg().startsWith("Already")) {
             then(job);
         }

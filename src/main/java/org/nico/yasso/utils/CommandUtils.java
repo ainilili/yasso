@@ -109,17 +109,28 @@ public class CommandUtils {
             boolean finished = false; // Set to true when p is finished
             while (!finished) {
                 try {
+                    StringBuilder line = new StringBuilder();
                     while (in.available() > 0) {
                         // Print the output of our system call
                         Character c = new Character((char) in.read());
                         inMsg.append(c);
-                        System.out.print(c);
+                        if(c != '\n') {
+                            line.append(c);
+                        }else {
+                            LOGGER.info(line.toString());
+                            line.setLength(0);
+                        }
                     }
                     while (err.available() > 0) {
                         // Print the output of our system call
                         Character c = new Character((char) err.read());
                         errMsg.append(c);
-                        System.out.print(c);
+                        if(c != '\n') {
+                            line.append(c);
+                        }else {
+                            LOGGER.info(line.toString());
+                            line.setLength(0);
+                        }
                     }
                     // Ask the process for its exitValue. If the process
                     // is not finished, an IllegalThreadStateException

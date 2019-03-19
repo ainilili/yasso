@@ -10,7 +10,7 @@ import org.nico.yasso.utils.StringUtils;
 
 public abstract class AbstractPlugins{
 
-    public final static LinkedList<AbstractPipeline> pipelines = new LinkedList<AbstractPipeline>();
+    protected LinkedList<AbstractPipeline> pipelines = new LinkedList<AbstractPipeline>();
 
     public abstract void initialize();
 

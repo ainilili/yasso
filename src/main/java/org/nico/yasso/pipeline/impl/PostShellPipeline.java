@@ -19,6 +19,8 @@ public class PostShellPipeline extends AbstractPipeline{
         
         CommandUtils.execute(scripts, jobspace);
         LOGGER.info("Post script execute successful !!");
+        
+        then(job);
     }
 
 }

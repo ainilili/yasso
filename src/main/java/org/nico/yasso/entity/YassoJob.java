@@ -1,12 +1,8 @@
 package org.nico.yasso.entity;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.nico.yasso.Yasso;
 import org.nico.yasso.plugins.AbstractPlugins;
 import org.nico.yasso.plugins.GitPlugins;
-import org.nico.yasso.utils.FileUtils;
 import org.nico.yasso.utils.StringUtils;
 
 public class YassoJob {
@@ -26,6 +22,8 @@ public class YassoJob {
     private Build build;
     
     private Context context;
+    
+    private Mail mail;
 
     private volatile boolean scriptBuildFlag;
     
@@ -68,6 +66,14 @@ public class YassoJob {
 
     public Git getGit() {
         return git;
+    }
+
+    public Mail getMail() {
+        return mail;
+    }
+
+    public void setMail(Mail mail) {
+        this.mail = mail;
     }
 
     public void setGit(Git git) {
@@ -121,124 +127,6 @@ public class YassoJob {
 
     public void setJobspace(String jobspace) {
         this.jobspace = jobspace;
-    }
-
-    public static class Git{
-        
-        private String url;
-        
-        private String user;
-        
-        private String pwd;
-        
-        private String name;
-        
-        private String branch;
-        
-        public String getBranch() {
-            return branch;
-        }
-
-        public void setBranch(String branch) {
-            this.branch = branch;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
-        }
-
-        public String getPwd() {
-            return pwd;
-        }
-
-        public void setPwd(String pwd) {
-            this.pwd = pwd;
-        }
-        
-    }
-    
-    public static class Build {
-        
-        private String cron;
-        
-        private String pre;
-        
-        private String post;
-
-        public String getCron() {
-            return cron;
-        }
-
-        public void setCron(String cron) {
-            this.cron = cron;
-        }
-
-        public String getPre() {
-            return pre;
-        }
-
-        public void setPre(String pre) {
-            this.pre = pre;
-        }
-
-        public String getPost() {
-            return post;
-        }
-
-        public void setPost(String post) {
-            this.post = post;
-        }
-        
-    }
-    
-    public static class Context{
-        
-        private Map<String, Object> datas;
-        
-        public Context() {
-            datas = new ConcurrentHashMap<String, Object>();
-        }
-        
-        public Object put(String key, Object value) {
-            return datas.put(key, value);
-        }
-        
-        public Object remove(String key, Object value) {
-            return datas.remove(key, value);
-        }
-        
-        public boolean contains(String key) {
-            return datas.containsKey(key);
-        }
-
-        public Map<String, Object> getDatas() {
-            return datas;
-        }
-
-        public void setDatas(Map<String, Object> datas) {
-            this.datas = datas;
-        }
-
     }
     
     @Override

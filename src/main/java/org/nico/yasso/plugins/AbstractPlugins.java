@@ -2,8 +2,8 @@ package org.nico.yasso.plugins;
 
 import java.util.LinkedList;
 
+import org.nico.yasso.entity.Git;
 import org.nico.yasso.entity.YassoJob;
-import org.nico.yasso.entity.YassoJob.Git;
 import org.nico.yasso.pipeline.AbstractPipeline;
 import org.nico.yasso.utils.FileUtils;
 import org.nico.yasso.utils.StringUtils;

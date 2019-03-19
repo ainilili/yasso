@@ -128,7 +128,7 @@ public class CommandUtils {
                         if(c != '\n') {
                             line.append(c);
                         }else {
-                            LOGGER.info(line.toString());
+                            LOGGER.error(line.toString());
                             line.setLength(0);
                         }
                     }

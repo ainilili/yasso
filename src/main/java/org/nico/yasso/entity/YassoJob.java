@@ -1,6 +1,7 @@
 package org.nico.yasso.entity;
 
 import org.nico.yasso.Yasso;
+import org.nico.yasso.consts.BuildState;
 import org.nico.yasso.plugins.AbstractPlugins;
 import org.nico.yasso.plugins.GitPlugins;
 import org.nico.yasso.utils.StringUtils;
@@ -40,12 +41,23 @@ public class YassoJob {
         }else {
             plugins = (AbstractPlugins) Class.forName(pluginsClass).newInstance();
         }
-        
-        context = new Context();
         workspace = Yasso.getYasso().getWorkspace();
+        context = new Context();
         
         plugins.initialize();
         plugins.check(this);
+        
+        
+        context.put("workspace", workspace);
+        context.put("jobspace", jobspace);
+        context.put("jobName", name);
+        
+        if(git != null) {
+            context.put("projectName", git.getName());
+            context.put("branch", git.getBranch());
+        }
+        
+        context.put("buildState", BuildState.FAILURE);
     }
 
     public boolean isScriptBuildFlag() {

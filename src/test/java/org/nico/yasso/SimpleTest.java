@@ -48,17 +48,18 @@ public class SimpleTest {
         httpFlag += 3;
         gitUrl = gitUrl.substring(0, httpFlag) + sign + gitUrl.substring(httpFlag);
         System.out.println(gitUrl);
-        
+
         System.out.println(gitUrl.substring(gitUrl.lastIndexOf("/") + 1, gitUrl.lastIndexOf(".")));
     }
-    
+
     @Test
     public void testYaml() throws FileNotFoundException {
         Yaml yaml = new Yaml();
         File f = new File("D:\\yasso\\snails.yml");
         YassoJob job = yaml.loadAs(new FileInputStream(f), YassoJob.class);
-        
+
         String post = job.getBuild().getPost();
         System.out.println(post);
     }
+    
 }

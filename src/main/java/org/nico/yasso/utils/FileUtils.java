@@ -1,6 +1,9 @@
 package org.nico.yasso.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -99,6 +102,28 @@ public class FileUtils {
     
     public static boolean isYaml(String fileName) {
         return fileName.endsWith(".yml") || fileName.endsWith(".yaml");
+    }
+    
+    public static String read2Str(String url) throws FileNotFoundException{ 
+        BufferedReader br = new BufferedReader(new FileReader(url));  
+        StringBuilder reqStr = new StringBuilder();  
+        char[] buf = new char[2048];  
+        int len = -1;
+        try {
+            while ((len = br.read(buf)) != -1) {  
+                reqStr.append(new String(buf, 0, len));  
+            }  
+            br.close();
+        }catch(IOException e) {
+            return null;
+        }finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return reqStr.toString();
     }
     
 }

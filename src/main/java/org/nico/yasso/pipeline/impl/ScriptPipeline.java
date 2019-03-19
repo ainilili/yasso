@@ -1,6 +1,7 @@
 package org.nico.yasso.pipeline.impl;
 
 import org.nico.yasso.Yasso;
+import org.nico.yasso.consts.BuildState;
 import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.pipeline.AbstractPipeline;
 import org.nico.yasso.utils.FileUtils;
@@ -12,7 +13,7 @@ public class ScriptPipeline extends AbstractPipeline{
     private final static Logger LOGGER = LoggerFactory.getLogger(ScriptPipeline.class);
     
     @Override
-    public void pipeline(YassoJob job) {
+    public BuildState pipeline(YassoJob job) {
         if(! job.isScriptBuildFlag()) {
             job.setScriptBuildFlag(true);
             
@@ -40,7 +41,7 @@ public class ScriptPipeline extends AbstractPipeline{
         }
         
         
-        then(job);
+        return then(job);
     }
 
 }

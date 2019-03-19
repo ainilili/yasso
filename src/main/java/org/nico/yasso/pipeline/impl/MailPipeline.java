@@ -1,8 +1,10 @@
 package org.nico.yasso.pipeline.impl;
 
+import org.nico.yasso.consts.BuildState;
 import org.nico.yasso.entity.Mail;
 import org.nico.yasso.entity.YassoJob;
 import org.nico.yasso.pipeline.AbstractPipeline;
+import org.nico.yasso.templator.Templator;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.email.Recipient;
@@ -15,8 +17,10 @@ public class MailPipeline extends AbstractPipeline{
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MailPipeline.class);
     
+    private final static Templator TEMPLATOR = new Templator("${", "}");
+    
     @Override
-    public void pipeline(YassoJob job) {
+    public BuildState pipeline(YassoJob job) {
         
         if(job.getMail() == null) {
             LOGGER.error("Missing mail configuration.");
@@ -38,6 +42,9 @@ public class MailPipeline extends AbstractPipeline{
                 
                 String[] toList = template.getRecipients().toArray(new String[] {});
                 
+                template.setTitle(TEMPLATOR.render(template.getTitle().trim(), job.getContext().getDatas()));
+                template.setContent(TEMPLATOR.render(template.getContent(), job.getContext().getDatas()));
+                
                 Email email = EmailBuilder.startingBlank()
                         .from(from)
                         .to("YASSO", toList)
@@ -49,10 +56,11 @@ public class MailPipeline extends AbstractPipeline{
                 
                 mailer.sendMail(email);
                 
-                then(job);
+                return then(job);
             }
         }
         
+        return BuildState.SUCCESS;
         
     }
 

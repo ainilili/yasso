@@ -15,10 +15,13 @@ public class PostShellPipeline extends AbstractPipeline{
         
         String jobspace = job.getJobspace();
 
-        String[] scripts = job.getBuild().getPost().split("\r\n|\n");
+        String scripts = job.getBuild().getPost();
         
-        CommandUtils.execute(scripts, jobspace);
-        LOGGER.info("Post script execute successful !!");
+        if(CommandUtils.execute(scripts, jobspace).isSuccessed()) {
+            LOGGER.info("Post script execute successful !!");
+        }else {
+            LOGGER.info("Post script execute failure !!");
+        }
         
         then(job);
     }

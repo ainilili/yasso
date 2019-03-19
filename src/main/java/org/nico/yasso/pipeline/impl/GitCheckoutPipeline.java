@@ -19,10 +19,9 @@ public class GitCheckoutPipeline extends AbstractPipeline{
             job.getGit().setBranch(branch);;
         }
         
-        
-        CommandUtils.execute("git checkout " + branch, jobspace);
-        
-        then(job);
+        if(CommandUtils.execute("git checkout " + branch, jobspace).isSuccessed()) {
+            then(job);
+        }
     }
 
 }

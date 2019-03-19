@@ -11,9 +11,9 @@ public class GitFetchPipeline extends AbstractPipeline{
         
         String jobspace = job.getJobspace();
 
-        CommandUtils.execute("git fetch", jobspace);
-        
-        then(job);
+        if(CommandUtils.execute("git fetch", jobspace).isSuccessed()) {
+            then(job);    
+        }
     }
 
 }

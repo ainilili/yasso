@@ -13,9 +13,12 @@ public class CommandUtils {
 
     public static Result execute(String script, String dir) {
         try {
-            LOGGER.info("+ " + script);
+            LOGGER.info(">>>>>> + {}", script);
             Process process = Runtime.getRuntime().exec(script, null, new File(dir));
-            return doWaitFor(process);
+            Result result = doWaitFor(process);
+            LOGGER.info("<<<<<< - {}", result.isSuccessed() ? "SUCCESS" : "FAILED");
+            
+            return result;
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -98,6 +101,7 @@ public class CommandUtils {
     public static Result doWaitFor(Process process) {
         InputStream in = null;
         InputStream err = null;
+        int exitValue = 0;
 
         StringBuilder inMsg = new StringBuilder();
         StringBuilder errMsg = new StringBuilder();
@@ -128,7 +132,7 @@ public class CommandUtils {
                         if(c != '\n') {
                             line.append(c);
                         }else {
-                            LOGGER.error(line.toString());
+                            LOGGER.info(line.toString());
                             line.setLength(0);
                         }
                     }
@@ -136,7 +140,7 @@ public class CommandUtils {
                     // is not finished, an IllegalThreadStateException
                     // is thrown. If it is finished, we fall through and
                     // the variable finished is set to true.
-                    process.exitValue();
+                    exitValue = process.exitValue();
                     finished = true;
                 } catch (IllegalThreadStateException e) {
                     // Process is not finished yet;
@@ -162,7 +166,7 @@ public class CommandUtils {
                 }
             }
         }
-        return new Result(errMsg.toString(), inMsg.toString());
+        return new Result(errMsg.toString(), inMsg.toString(), exitValue == 0);
     }
 
     public static class Result{
@@ -170,10 +174,13 @@ public class CommandUtils {
         private String errorMsg;
 
         private String successMsg;
+        
+        private boolean successed;
 
-        public Result(String errorMsg, String successMsg) {
+        public Result(String errorMsg, String successMsg, boolean successed) {
             this.errorMsg = errorMsg;
             this.successMsg = successMsg;
+            this.successed = successed;
         }
 
         public String getErrorMsg() {
@@ -192,9 +199,17 @@ public class CommandUtils {
             this.successMsg = successMsg;
         }
 
+        public boolean isSuccessed() {
+            return successed;
+        }
+
+        public void setSuccessed(boolean successed) {
+            this.successed = successed;
+        }
+
         @Override
         public String toString() {
-            return "Result [errorMsg=" + errorMsg + "\n, successMsg=" + successMsg + "]";
+            return "Result [errorMsg=" + errorMsg + ", successMsg=" + successMsg + ", successed=" + successed + "]";
         }
 
     }

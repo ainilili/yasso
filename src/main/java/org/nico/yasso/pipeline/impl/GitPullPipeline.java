@@ -17,7 +17,7 @@ public class GitPullPipeline extends AbstractPipeline{
         if(! result.getSuccessMsg().startsWith("Already")) {
             job.getContext().put("build", true);
         }
-        if(job.getContext().get("build").equals(true)) {
+        if(job.getContext().contains("build") && job.getContext().get("build").equals(true)) {
             return then(job);
         }
         return BuildState.PREPARE;

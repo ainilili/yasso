@@ -14,6 +14,8 @@ public class GitClonePipeline extends AbstractPipeline{
         String gitName = job.getGit().getName();
         String workspace = job.getWorkspace();
         
+        job.getContext().put("build", false);
+        
         if(! FileUtils.containsFile(workspace, gitName)) {
             CommandUtils.execute("git clone " + gitUrl, workspace);
             job.getContext().put("build", true);

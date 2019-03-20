@@ -116,7 +116,6 @@ public class YassoJob {
         this.build = build;
     }
 
-
     public Context getContext() {
         return context;
     }

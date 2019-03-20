@@ -16,10 +16,11 @@ public class GitClonePipeline extends AbstractPipeline{
         
         if(! FileUtils.containsFile(workspace, gitName)) {
             CommandUtils.execute("git clone " + gitUrl, workspace);
+            job.getContext().put("build", true);
         }
         
         if(FileUtils.containsFile(workspace, gitName)) {
-            return then(job);   
+            return then(job);
         }
         return BuildState.PREPARE;
     }

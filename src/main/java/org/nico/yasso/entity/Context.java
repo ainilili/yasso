@@ -22,6 +22,10 @@ public class Context{
     public boolean contains(String key) {
         return datas.containsKey(key);
     }
+    
+    public Object get(String key) {
+        return datas.get(key);
+    }
 
     public Map<String, Object> getDatas() {
         return datas;

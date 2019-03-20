@@ -15,6 +15,9 @@ public class GitPullPipeline extends AbstractPipeline{
 
         Result result = CommandUtils.execute("git pull --progress -v --no-rebase origin " + job.getGit().getBranch(), jobspace);
         if(! result.getSuccessMsg().startsWith("Already")) {
+            job.getContext().put("build", true);
+        }
+        if(job.getContext().get("build").equals(true)) {
             return then(job);
         }
         return BuildState.PREPARE;

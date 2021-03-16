@@ -53,6 +53,7 @@ public abstract class JobsObserver {
                                 deleteEvent(event);
                             }  
                         } catch (Exception e) {
+                            e.printStackTrace();
                             LOGGER.error(e.getMessage());
                         }
                     });

@@ -13,7 +13,7 @@ public class CommandUtils {
 
     public static Result execute(String script, String dir) {
         try {
-            LOGGER.info(">>>>>> + {}", script);
+            LOGGER.info(">>>>>> {} + {}", dir, script);
             Process process = Runtime.getRuntime().exec(script, null, new File(dir));
             Result result = doWaitFor(process);
             LOGGER.info("<<<<<< - {}", result.isSuccessed() ? "SUCCESS" : "FAILED");

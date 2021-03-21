@@ -28,3 +28,5 @@ hs_err_pid*
 /confspace
 /workspace
 /space
+/.idea
+/*.iml
